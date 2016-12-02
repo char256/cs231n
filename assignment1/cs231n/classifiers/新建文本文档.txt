@@ -1,0 +1,112 @@
+def loss(self, X, y=None, reg=0.0):
+    """
+    Compute the loss and gradients for a two layer fully connected neural
+    network.
+
+    Inputs:
+    - X: Input data of shape (N, D). Each X[i] is a training sample.
+    - y: Vector of training labels. y[i] is the label for X[i], and each y[i] is
+      an integer in the range 0 <= y[i] < C. This parameter is optional; if it
+      is not passed then we only return scores, and if it is passed then we
+      instead return the loss and gradients.
+    - reg: Regularization strength.
+
+    Returns:
+    If y is None, return a matrix scores of shape (N, C) where scores[i, c] is
+    the score for class c on input X[i].
+
+    If y is not None, instead return a tuple of:
+    - loss: Loss (data loss and regularization loss) for this batch of training
+      samples.
+    - grads: Dictionary mapping parameter names to gradients of those parameters
+      with respect to the loss function; has the same keys as self.params.
+    """
+    # Unpack variables from the params dictionary
+    W1, b1 = self.params['W1'], self.params['b1']
+    W2, b2 = self.params['W2'], self.params['b2']
+    N, D = X.shape
+
+    # Compute the forward pass
+    scores = None
+    #############################################################################
+    # TODO: Perform the forward pass, computing the class scores for the input. #
+    # Store the result in the scores variable, which should be an array of      #
+    # shape (N, C).                                                             #
+    #############################################################################
+
+    # evaluate class scores, [N x K]
+    hidden_layer = np.maximum(0, np.dot(X,W1)+b1) # ReLU activation
+    scores = np.dot(hidden_layer, W2)+b2
+
+    #############################################################################
+    #                              END OF YOUR CODE                             #
+    #############################################################################
+
+    # If the targets are not given then jump out, we're done
+    if y is None:
+      return scores
+
+    # Compute the loss
+    loss = None
+    #############################################################################
+    # TODO: Finish the forward pass, and compute the loss. This should include  #
+    # both the data loss and L2 regularization for W1 and W2. Store the result  #
+    # in the variable loss, which should be a scalar. Use the Softmax           #
+    # classifier loss. So that your results match ours, multiply the            #
+    # regularization loss by 0.5                                                #
+    #############################################################################
+
+    # compute the class probabilities
+    #scores -= np.max(scores, axis = 1)[:, np.newaxis]
+    #exp_scores = np.exp(scores)
+    exp_scores = np.exp(scores-np.max(scores, axis=1, keepdims=True))
+    probs = exp_scores/np.sum(exp_scores, axis=1, keepdims=True) #[N X C]
+
+    correct_logprobs = -np.log(probs[range(N),y])
+    data_loss = np.sum(correct_logprobs)/N
+    reg_loss = 0.5 * reg * ( np.sum(W1*W1) + np.sum(W2*W2) )
+    loss = data_loss + reg_loss
+
+    #############################################################################
+    #                              END OF YOUR CODE                             #
+    #############################################################################
+
+    # Backward pass: compute gradients
+    grads = {}
+    #############################################################################
+    # TODO: Compute the backward pass, computing the derivatives of the weights #
+    # and biases. Store the results in the grads dictionary. For example,       #
+    # grads['W1'] should store the gradient on W1, and be a matrix of same size #
+    #############################################################################
+
+    # compute the gradient on scores
+    dscores = probs
+    dscores[range(N),y] -= 1
+    dscores /= N
+
+    # backpropate the gradient to the parameters
+    # first backprop into parameters W2 and b2
+    dW2 = np.dot(hidden_layer.T, dscores)
+    db2 = np.sum(dscores, axis=0, keepdims=False)
+    # next backprop into hidden layer
+    dhidden = np.dot(dscores, W2.T)
+    # backprop the ReLU non-linearity
+    dhidden[hidden_layer <= 0] = 0
+    # finally into W,b
+    dW1 = np.dot(X.T, dhidden)
+    db1 = np.sum(dhidden, axis=0, keepdims=False)
+
+    # add regularization gradient contribution
+    dW2 += reg * W2
+    dW1 += reg * W1
+
+    grads['W1'] = dW1
+    grads['W2'] = dW2
+    grads['b1'] = db1
+    grads['b2'] = db2
+    #print dW1.shape, dW2.shape, db1.shape, db2.shape
+    #############################################################################
+    #                              END OF YOUR CODE                             #
+    #############################################################################
+
+    return loss, grads
