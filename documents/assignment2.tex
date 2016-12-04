@@ -130,6 +130,18 @@ $\beta = \sum{\partial out}$这个应该不难理解。\\
 偏导数加起来。
 剩下的就按照反向传播往前传就好了。
 
+\section{Q4: ConvNet on CIFAR-10}
+\subsection{Spatial Batch Normalization}
+在卷积网络里的Batch Normalization与普通的Normalization不太一样。如
+\ref{fig:spatial_batch_norm}所示。
+\begin{figure}[h]
+  \includegraphics[width=5in]{./assignment1_pic/spatial_batchnorm.jpg}
+  \caption{spatial\_batch\_normalization}
+  \label{fig:spatial_batch_norm}
+\end{figure}
+标准化的过程是要将黄色的地方求均值与方差。所以要用到python中的一个函数来交换数组的
+维度。交换完成以后就万事大吉了。
+
 
 \end{flushleft}
 \end{document}
