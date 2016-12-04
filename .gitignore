@@ -9,7 +9,8 @@ datasets/
 *.aux
 *.fdb_*
 *.fls
-*.synctex.gz
+*.synctex.gz*
+*.vscode*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

@@ -78,36 +78,57 @@ shift是正太分布的中心，scale是方差（代码里面是gamma和beta）�
 \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=2.8cm,
                     semithick]
   \tikzstyle{every state}=[fill=yellow1,draw=none,text=black]
+  \tikzstyle{divbelow}=[below,text=gray]
+  \tikzstyle{divabove}=[above,text=gray]
+  \node[state]  (X)         at (-5,6) {$X$};
+  \node[state]  (minus)     at (-3,6) {$-$};
+  \node[state]  (star1)     at (4,6) {$*$};
+  \node[state]  (star2)     at (6,6) {$*$};
+  \node[state]  (plus)      at (8,6) {$+$};
+  \node[state]  (mu)        at (-4,4) {$\mu$};
+  \node[state]  (sqr)       at (-2,4) {$\^2$};
+  \node[state]  (var)       at (0,4) {$\frac{1}{n}\sum$};
+  \node[state]  (sqrtvar)   at (2,4) {$sqrt$};
+  \node[state]  (ivar)      at (4,4) {$\frac{1}{t}$};
+  \node[state]  (gamma)     at (-5,2) {$\gamma$};
+  \node[state]  (beta)      at (-5,0) {$\beta$};
+  \node[state]  (out)       at (10,6) {out};
 
-  \node[state]         (S) at (-6, 0)              {$S$};
-  \node[state]         (xin1) at (-2, 3)           {$X^1_{in}$};
-  \node[state]         (xin2) at (-2, 1)        {$X^2_{in}$};
-  \node[state]         (xin3) at (-2, -1)       {$X^3_{in}$};
-  \node[state]         (xin4) at (-2, -3)           {$X^4_{in}$};
-  \node[state]         (xout1) at (0, 3)          {$X^1_{out}$};
-  \node[state]         (xout2) at (0, 1)        {$X^2_{out}$};
-  \node[state]         (xout3) at (0, -1)   {$X^3_{out}$};
-  \node[state]         (xout4) at (0, -3)           {$X^4_{out}$};
-  \node[state]         (xin5)  at (3, -2)   {$X^5_{in}$};
-  \node[state]         (xout5) at (5, -2)   {$X^5_{out}$};
-  \node[state]         (DC) at (7, 2)           {$DC$};
+  \path (X)       edge            node {$x$}        (minus)
+                  edge            node {$x$}        (mu)
+        (mu)      edge            node {$\mu$}      (minus)
+        (minus)   edge            node {$x-\mu$}    (star1)
+                  edge            node {$x-\mu$}    (sqr)
+        (sqr)     edge            node {$(x-\mu)^2$}(var)
+        (var)     edge            node {$var$}      (sqrtvar)
+        (sqrtvar) edge            node {$sqrtvar$}  (ivar)
+        (ivar)    edge            node {$ivar$}     (star1)
+        (star1)   edge            node {$\hat{x}$}  (star2)
+        (star2)   edge            node {}           (plus)
+        (plus)    edge            node {}           (out);
+  \draw[->] (gamma) to[out=0,in=-90]  node {$\gamma$}   (star2);
+  \draw[->] (beta)  to[out=0,in=-90]  node {$\beta$}    (plus);
 
-  \path (S) edge[bend left=26]              node {$\infty$} (xin1)
-            edge[bend left=12]              node {$\infty$} (xin2)
-            edge[bend right=12]             node {$\infty$} (xin3)
-            edge[bend right=26]             node {$\infty$} (xin4)
-        (xin1) edge  node {$\alpha=1$} (xout1)
-        (xin2) edge  node {$\alpha=1$} (xout2)
-        (xin3) edge  node {$\alpha=1$} (xout3)
-        (xin4) edge  node {$\alpha=1$} (xout4)
-        (xin5) edge  node {$1$} (xout5);
-  \draw[->] (xout1) to[out=-30,in=150] node {$\beta$} (xin5);
-  \draw[->] (xout2.east) to[out=-15,in=165] node [below] {$\beta$} (xin5);
-  \draw[->] (xout3.east) to[out=0,in=180] node [below] {$\beta$} (xin5.west);
-  \draw[->] (xout1) to[out=-5,in=175] node {$\infty$} (DC);
-  \draw[->] (xout5) to[out=40, in=-120] node {$\infty$} (DC);
+  \node[divbelow] (dstar1)     at (5,6)      {$\partial{\hat{x}}$};
+  \node[divbelow] (dminus1)    at (0,6)      {$\partial{(x-\mu)_1}$};
+  \node[divbelow] (dx)         at (-4,6)     {$\partial{x_1}$};
+  \node[divbelow] (dout)       at (9,6)      {$\partial{out}$};
+  \node[divbelow] (dout1)      at (7,6)      {$\partial{out}$};
+  \node[divbelow] (divar)      at (4.5,5)    {$\partial{ivar}$};
+  \node[divabove] (dsqrtvar)   at (3,3)      {$\partial{sqrtvar}$};
+  \node[divabove] (dvar)       at (1,3)      {$\partial{var}$};
+  \node[divabove] (dsqr)       at (-1,3)     {$\partial{(x-\mu)^2}$};
+  \node[divbelow] (dminus2)    at (-2.5,5.3) {$\partial{(x-\mu)_2}$};
+  \node[divbelow] (dmu)        at (-3.5,5)   {$\partial{\mu}$};
+  \node[divbelow] (dx2)        at (-4.8,5)   {$\partial{x_2}$};
 \end{tikzpicture}
-
+这个图差不多是整个作业里面最复杂的一个反向传播的图了。借鉴了网上的一个博客，具体
+地址忘记了。。。\\
+$\beta = \sum{\partial out}$这个应该不难理解。\\
+而$\partial out$仅仅是经过了一个加法运算，所以再加号左边仍然不变.\\
+另外在前面，第一个节点X跟减号的节点有分叉。对于分叉的节点，偏导数就把各个分支的
+偏导数加起来。
+剩下的就按照反向传播往前传就好了。
 
 
 \end{flushleft}
